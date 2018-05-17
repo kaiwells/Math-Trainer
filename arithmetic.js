@@ -10,36 +10,121 @@ var DIVISION = 3;
 var HORIZONTAL = 0;
 var VERTICAL = 1;
 var number1 = Math.floor(Math.random() * 10);
-var number2 = Math.floor(Math.random() * 10);
-var arithmeticFunction = ADDITION;
+var number2 = Math.floor(Math.random() * 9) + 1;
+var arithmeticFunction = Math.floor(Math.random() * 4);
 var alignment = HORIZONTAL;
+var correctAnswers = 0;
+
+var painting = document.getElementById('paint');
+var paint_style = getComputedStyle(painting);
+//canvas.width = parseInt(paint_style.getPropertyValue('width'));
+//canvas.height = parseInt(paint_style.getPropertyValue('height'));
+
+var mouse = {x: 0, y: 0};
+ 
+canvas.addEventListener('mousemove', function(e) {
+  mouse.x = e.pageX - this.offsetLeft;
+  mouse.y = e.pageY - this.offsetTop;
+}, false);
+
+ctx.lineWidth = 3;
+ctx.lineJoin = 'round';
+ctx.lineCap = 'round';
+ctx.strokeStyle = '#00CC99';
+ 
+canvas.addEventListener('mousedown', function(e) {
+    ctx.beginPath();
+    ctx.moveTo(mouse.x, mouse.y);
+ 
+    canvas.addEventListener('mousemove', onPaint, false);
+}, false);
+ 
+canvas.addEventListener('mouseup', function() {
+    canvas.removeEventListener('mousemove', onPaint, false);
+}, false);
+ 
+var onPaint = function() {
+    ctx.lineTo(mouse.x, mouse.y);
+    ctx.stroke();
+};
 
 function draw() {
-	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	//ctx.clearRect(0, 0, canvas.width, canvas.height);
 	if(IMAGES_LOADED === 1){
-		ctx.font = "45px Arial";
-		if (alignment === HORIZONTAL) {
-			if (arithmeticFunction === ADDITION) {
-				ctx.fillText(number1 + " + " + number2 + " =",130,200);
-			} else if (arithmeticFunction === SUBTRACTION) {
-				ctx.fillText(number1 + " - " + number2 + " =",130,200);
-			}
-		} else {
-			if (arithmeticFunction === ADDITION) {
-				ctx.fillText(number1,190,160);
-				ctx.fillText(number2,190,200);
-				ctx.fillText("+",130,200);
-				ctx.fillText("____",130,200);
-			} else if (arithmeticFunction === SUBTRACTION) {
-				ctx.fillText(number1,190,160);
-				ctx.fillText(number2,190,200);
-				ctx.fillText("-",130,200);
-				ctx.fillText("____",130,200);
-			}
-		}
+		
+		
 	}
 }
 
+function drawQuestion() {
+	ctx.font = "45px Arial";
+	if (alignment === HORIZONTAL) {
+		ctx.textAlign = "left";
+		if (arithmeticFunction === ADDITION) {
+			ctx.fillText(number1 + " + " + number2 + " =",130,200);
+		} else if (arithmeticFunction === SUBTRACTION) {
+			ctx.fillText(number1 + " - " + number2 + " =",130,200);
+		} else if (arithmeticFunction === MULTIPLICATION) {
+			ctx.fillText(number1 + " x " + number2 + " =",130,200);
+		} else if (arithmeticFunction === DIVISION) {
+			ctx.fillText((number1 * number2) + unescape('%F7') + number2 + " =",130,200);
+		}
+	} else {
+		ctx.textAlign = "right";
+		if (arithmeticFunction === ADDITION) {
+			ctx.fillText(number1,190,160);
+			ctx.fillText(number2,190,200);
+			ctx.fillText("+",130,200);
+			ctx.fillText("____",190,200);
+		} else if (arithmeticFunction === SUBTRACTION) {
+			ctx.fillText(number1,190,160);
+			ctx.fillText(number2,190,200);
+			ctx.fillText("-",130,200);
+			ctx.fillText("____",190,200);
+		} else if (arithmeticFunction === MULTIPLICATION) {
+			ctx.fillText(number1,190,160);
+			ctx.fillText(number2,190,200);
+			ctx.fillText("x",130,200);
+			ctx.fillText("____",190,200);
+		} else if (arithmeticFunction === DIVISION) {
+			ctx.fillText(number1 * number2,190,160);
+			ctx.fillText(number2,190,200);
+			ctx.fillText(unescape('%F7'),130,200);
+			ctx.fillText("____",190,200);
+		}
+	}
+	ctx.textAlign = "left";
+	ctx.font = "15px Arial";
+	ctx.fillText("Your Score: " + correctAnswers,10,30);
+		
+}
+function correctAnswerMade() {
+	//alert("correct");
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	if (alignment === HORIZONTAL) {
+		alignment = VERTICAL;
+	} else {
+		alignment = HORIZONTAL;
+	}
+	correctAnswers++;
+	number1 = Math.floor(Math.random() * 10);
+	number2 = Math.floor(Math.random() * 10);
+	if (correctAnswers > 4) {
+		number1 = Math.floor(Math.random() * 100);
+		number2 = Math.floor(Math.random() * 10);
+	}
+	if (correctAnswers > 9) {
+		number1 = Math.floor(Math.random() * 100);
+		number2 = Math.floor(Math.random() * 100);
+	}
+	arithmeticFunction = Math.floor(Math.random() * 4);
+	if (arithmeticFunction === DIVISION && number2 === 0) {
+		number2++;
+	}
+	document.getElementById("answer").value = "";
+	drawQuestion();
+}
+drawQuestion();
 setInterval(draw, 10);
 
 // 1. Create the button
@@ -63,33 +148,27 @@ button.addEventListener ("click", function() {
 	//var fail = document.getElementById("fail");
 	if (arithmeticFunction === ADDITION) {
 		if(parseInt(guess)===number1 + number2) {
-			alert("correct");
-			if (alignment === HORIZONTAL) {
-				alignment = VERTICAL;
-			} else {
-				alignment = HORIZONTAL;
-			}
-			number1 = Math.floor(Math.random() * 10);
-			number2 = Math.floor(Math.random() * 10);
-			arithmeticFunction = Math.floor(Math.random() * 2);
-			document.getElementById("answer").value = "";
+			correctAnswerMade();
 		} else {
-			alert("flail");
+			//alert("flail");
 		}
 	} else if (arithmeticFunction === SUBTRACTION) {
 		if(parseInt(guess)===number1 - number2) {
-			alert("correct");
-			if (alignment === HORIZONTAL) {
-				alignment = VERTICAL;
-			} else {
-				alignment = HORIZONTAL;
-			}
-			number1 = Math.floor(Math.random() * 10);
-			number2 = Math.floor(Math.random() * 10);
-			arithmeticFunction = Math.floor(Math.random() * 2);
-			document.getElementById("answer").value = "";
+			correctAnswerMade();
 		} else {
-			alert("flail");
+			//alert("flail");
+		}
+	} else if (arithmeticFunction === MULTIPLICATION) {
+		if(parseInt(guess)===number1 * number2) {
+			correctAnswerMade();
+		} else {
+			//alert("flail");
+		}
+	} else if (arithmeticFunction === DIVISION) {
+		if(parseInt(guess)===number1) {
+			correctAnswerMade();
+		} else {
+			//alert("flail");
 		}
 	}
 });
