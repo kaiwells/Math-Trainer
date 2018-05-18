@@ -35,6 +35,10 @@ ctx.strokeStyle = '#00CC99';
 canvas.addEventListener('mousedown', function(e) {
     ctx.beginPath();
     ctx.moveTo(mouse.x, mouse.y);
+	if (mouse.x > 270 && mouse.y < 30) {
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+		drawQuestion();
+	}
  
     canvas.addEventListener('mousemove', onPaint, false);
 }, false);
@@ -51,7 +55,6 @@ var onPaint = function() {
 function draw() {
 	//ctx.clearRect(0, 0, canvas.width, canvas.height);
 	if(IMAGES_LOADED === 1){
-		
 		
 	}
 }
@@ -96,7 +99,8 @@ function drawQuestion() {
 	ctx.textAlign = "left";
 	ctx.font = "15px Arial";
 	ctx.fillText("Your Score: " + correctAnswers,10,30);
-		
+	ctx.textAlign = "right";
+	ctx.fillText("Clear scratch pad",390,30);
 }
 function correctAnswerMade() {
 	//alert("correct");
