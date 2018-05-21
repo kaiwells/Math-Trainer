@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta chartset="utf-8">
+		<title id="title">Arithmetic Practice</title>
+		<style>
+		.container-textinput {
+				position: absolute;              /* NEW */
+				left: 50%;
+				transform: translateX(-50%);     /* NEW; see note below */
+				text-align: center;
+				width: 400px;
+				padding: 5px;
+				font-size: 32px;
+				font-family: Helvetica, sans-serif;
+				border: 2px solid black;
+			}
+			.myButton {
+				background-color: #1e5b94;
+				border: none;
+				color: #e9bd31;
+				padding: 15px 32px;
+				text-align: center;
+				text-decoration: none;
+				display: inline-block;
+				font-size: 16px;
+				margin: 25px 10px;
+				cursor: pointer;
+}
+		</style>		
+	</head>
+	<body>
+		<span></span>
+		<audio id="fail">
+			<source src="sound/fail.mp3" type="audio/mp3">
+			Your browser does not support the audio element.
+		</audio>
+		<audio id="success">
+			<source src="sound/success.mp3" type="audio/mp3">
+			Your browser does not support the audio element.
+		</audio>
+		<div>
+			<img src="" alt="No Picture Yet" width="200">
+		</div>
+		<div id="paint" style="text-align:center">
+			<!--<canvas id="myCanvas" class="centerCanvas">	-->
+			<canvas id="myCanvas" width="400" height="400" style="border: 3px solid #314159;">
+			</canvas>
+		</div>
+		<div class="container container-padding10">
+			<input type="text" id="answer" autofocus="autofocus" class="container-textinput">
+		</div>
+		<br>
+		<div id="buttonDiv" style="text-align: center; margin: 10px 10px;">
+			<button class="myButton" id="guessButton">Guess!</button>
+		</div>
+		<script type="text/javascript" src="math-trainer.js">
+		</script>
+	</body>
+</html>
