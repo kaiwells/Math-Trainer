@@ -15,6 +15,8 @@ var ALGEBRA = 1;
 var TIMEBONUS = 2;
 var TIMELOSS = 1;
 var SCORELOSS = 100;
+var PRACTICE = 0;
+var GAME = 1;
 var number1 = Math.floor(Math.random() * 10);
 var number2 = Math.floor(Math.random() * 9) + 1;
 var arithmeticFunction = Math.floor(Math.random() * 4);
@@ -33,6 +35,8 @@ var imageData = [{
 	url: "img/gameLogo.png",
 }];
 var scoreIncrement = 0;
+var highscore = localStorage.getItem("highscore");
+var gameMode;
 
 //var painting = document.getElementById('paint');
 //var paint_style = getComputedStyle(painting);
@@ -46,13 +50,13 @@ canvas.addEventListener('mousemove', function(e) {
   mouse.y = e.pageY - this.offsetTop;
 }, false);
 
-ctx.lineWidth = 3;
+ctx.lineWidth = 1;
 ctx.lineJoin = 'round';
 ctx.lineCap = 'round';
 ctx.strokeStyle = '#00CC99';
  
 canvas.addEventListener('mousedown', function(e) {
-	if (gameTimer > 0) {
+	if (gameTimer > 0 && resultTimer === 0) {
 		if (mouse.x > 260 && mouse.y < 50) {
 			ctx.beginPath();
 			ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -63,8 +67,20 @@ canvas.addEventListener('mousedown', function(e) {
 			ctx.moveTo(mouse.x, mouse.y);
 			ctx.strokeStyle = '#00CC99';
 		}
+		if (mouse.x > 260 && mouse.y > 350) {
+			gameTimer = 0;
+			gameStarted = false;
+			canvas.removeEventListener('mousemove', onPaint, false);
+			ctx.beginPath();
+		}
 	} else if (gameOverTimer <= 0) {
-		startNewGame();
+		if (mouse.x > 40 && mouse.x < 180 && mouse.y > 270 && mouse.y < 320) {
+			gameMode = PRACTICE;
+			startNewGame();
+		} else if (mouse.x > 220 && mouse.x < 360 && mouse.y > 270 && mouse.y < 320) {
+			gameMode = GAME;
+			startNewGame();
+		}
 	}
 }, false);
  
@@ -81,6 +97,8 @@ var onPaint = function() {
     ctx.stroke();
 };
 
+
+	
 //Loop over the list of images and add them to the Images Object. Wait for them all to load
 function loadImages(list){
      var total = 0;
@@ -120,18 +138,22 @@ function draw() {
 					ctx.fillStyle = '#00CC99';
 					ctx.font = "15px Arial";
 					ctx.textAlign = "left";
-					ctx.fillText("+" + scoreIncrement,150,30);
-					ctx.fillStyle = '#99CC00';
-					ctx.fillText("+" + TIMEBONUS + " sec",150,50);
+					ctx.fillText("+" + scoreIncrement,300,230 + 0.5*resultTimer);
+					if (gameMode === GAME) {
+						ctx.fillStyle = '#99CC00';
+						ctx.fillText("+" + TIMEBONUS + " sec",300,250 + 0.5*resultTimer);
+					}
 					ctx.fillStyle = '#000000';
 				} else {
 					ctx.fillText("Wrong",200,300);
 					ctx.fillStyle = '#FF0000';
 					ctx.font = "15px Arial";
 					ctx.textAlign = "left";
-					ctx.fillText("-" + SCORELOSS,150,30);
-					ctx.fillStyle = '#FFF000';
-					ctx.fillText("-" + TIMELOSS + " sec",150,50);
+					ctx.fillText("-" + SCORELOSS,300,230 + 0.5*resultTimer);
+					if (gameMode === GAME) {
+						ctx.fillStyle = '#FFF000';
+						ctx.fillText("-" + TIMELOSS + " sec",300,250 + 0.5*resultTimer);
+					}
 					ctx.fillStyle = '#000000';
 				}
 				if (resultTimer === 0) {
@@ -144,31 +166,47 @@ function draw() {
 			if (questionTimer < 100) {
 				questionTimer = 100;
 			}
-			ctx.clearRect(10, 35, 85, 15);
-			ctx.textAlign = "left";
-			ctx.font = "15px Arial";
-			ctx.fillText("Timer: " + (gameTimer/100).toFixed(2),10,50);
-			gameTimer--;
+			if (gameMode === GAME) {
+				ctx.clearRect(10, 35, 85, 15);
+				ctx.textAlign = "left";
+				ctx.font = "15px Arial";
+				ctx.fillText("Timer: " + (gameTimer/100).toFixed(2),10,50);
+				gameTimer--;
+			}
 			if (gameTimer === 0) {
+				if (highscore !== null) {
+					if (score > highscore) {
+						highscore = score;
+						localStorage.setItem("highscore", score);      
+					}
+				} else {
+					highscore = score;
+					localStorage.setItem("highscore", score);
+				}
 				ctx.clearRect(0, 0, canvas.width, canvas.height);
 				ctx.textAlign = "center";
 				ctx.font = "45px Arial";
 				ctx.fillText("Game Over!",200,100);
 				ctx.fillText("Final Score: " + score,200,150);
 				ctx.font = "30px Arial";
-				ctx.fillText("Click To Retry",200,250);
+				ctx.fillText("High Score: " + highscore,200,220);
+				ctx.fillText("Click To Retry",200,300);
 				gameOverTimer = 200;
 			}
 		} else if (gameStarted === false) {
 			ctx.clearRect(0, 0, canvas.width, canvas.height);
 			ctx.drawImage(Images["gameLogo"], 91, 100);
-			ctx.textAlign = "center";
-			ctx.font = "30px Arial";
-			ctx.fillText("Click to begin",200,350);
 			ctx.font = "15px Arial";
 			ctx.textAlign = "left";
-			ctx.fillText("Your Score: 0",10,30);
-			ctx.fillText("Timer: 60.00",10,50);
+			//ctx.fillText("Your Score: 0",10,30);
+			//ctx.fillText("Timer: 60.00",10,50);
+			ctx.textAlign = "center";
+			ctx.fillText("Practice Mode",110,300);
+			ctx.fillText("Game Mode",290,300);
+			ctx.strokeStyle = '#000000';
+			ctx.rect(40, 270, 140, 50);
+			ctx.rect(220, 270, 140, 50);
+			ctx.stroke();
 		} else {
 			gameOverTimer--;
 		}
@@ -224,16 +262,19 @@ function drawQuestion() {
 		} else if (arithmeticFunction === DIVISION) {
 			ctx.fillText("x " + unescape('%F7') + " " + number2 + " = " + number1,200,200);
 		}
-		
 	}
 	ctx.textAlign = "left";
 	ctx.font = "15px Arial";
 	ctx.fillText("Your Score: " + score,10,30);
-	ctx.fillText("Timer: " + gameTimer,10,50);
-	ctx.textAlign = "right";
-	ctx.fillText("Clear scratch pad",385,30);
+	if (gameMode === GAME) {
+		ctx.fillText("Timer: " + gameTimer,10,50);
+	}
+	ctx.textAlign = "center";
+	ctx.fillText("Clear scratch pad",330,30);
+	ctx.fillText("Quit",330,380);
 	ctx.strokeStyle = '#000000';
 	ctx.rect(260, 0, 140, 50);
+	ctx.rect(260, 350, 140, 50);
 	ctx.stroke();
 }
 
@@ -243,8 +284,9 @@ function correctAnswerMade() {
 	gameTimer += TIMEBONUS*100;
 	document.getElementById("success").load();
 	document.getElementById("success").play();
-	ctx.beginPath();
+	//ctx.beginPath();
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	canvas.removeEventListener('mousemove', onPaint, false);
 	if (mathSubject === ARITHMETIC) {
 		if (alignment === HORIZONTAL) {
 			alignment = VERTICAL;
@@ -395,10 +437,9 @@ button.addEventListener ("click", function() {
 		}
 		document.getElementById("answer").value = "";
 		resultTimer = 100;
-	} else if (gameOverTimer <= 0) {
+	} else if (gameOverTimer <= 0 && gameStarted === true) {
 		document.getElementById("answer").value = "";
 		startNewGame();
-		
 	}
 });
 
